@@ -106,13 +106,22 @@
                 <input type="text" id="incident_number" name="incident_number" placeholder="xxx" required>
             </div>
             
-            <div class="form-group">
-                <label for="reason">Violation Reason:</label>
-                <select id="reason" name="reason" required>
-                    <option value="Change">Change</option>
-                    <option value="Deploy">Deploy</option>
-                    <option value="Missed">Missed</option>
-                </select>
+        <div class="form-group">
+                <label>Violation Reason:</label>
+                <div style="margin-top: 10px;">
+                    <label style="display: block; margin: 10px 0; cursor: pointer;">
+                        <input type="radio" name="reason" value="Change" required style="width: auto; margin-right: 10px;">
+                        <span>Change</span>
+                    </label>
+                    <label style="display: block; margin: 10px 0; cursor: pointer;">
+                        <input type="radio" name="reason" value="Deploy" required style="width: auto; margin-right: 10px;">
+                        <span>Deploy</span>
+                    </label>
+                    <label style="display: block; margin: 10px 0; cursor: pointer;">
+                        <input type="radio" name="reason" value="Missed" required style="width: auto; margin-right: 10px;">
+                        <span>Missed</span>
+                    </label>
+                </div>
             </div>
             
             <button type="submit">Report Violation (Resets Counter)</button>
