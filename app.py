@@ -50,9 +50,9 @@ def load_data():
         'days_since': 1,
         'prior_count': 2,
         'incident_number': '540',
+        'incident_date': '2025-10-03',  # Add this
         'reason': 'Deploy',
-        'last_reset': datetime.now().isoformat(),
-        'last_increment': datetime.now().date().isoformat()
+        'last_reset': datetime.now().isoformat()
     }
 
 def save_data(data):
@@ -98,6 +98,14 @@ def display_on_epaper(img_path):
 def generate_sign(auto_display=False):
     """Generate the safety sign with current data"""
     data = load_data()
+    
+    # Calculate days since incident date
+    incident_date = datetime.fromisoformat(data['incident_date'])
+    today = datetime.now()
+    days_since = (today.date() - incident_date.date()).days
+    
+    # Update the display value
+    data['days_since'] = days_since
     
     # Open background image
     img = Image.open(BACKGROUND_IMAGE)
@@ -171,6 +179,12 @@ def send_to_display():
 @app.route('/')
 def index():
     data = load_data()
+    
+    # Calculate current days since incident
+    incident_date = datetime.fromisoformat(data['incident_date'])
+    today = datetime.now()
+    data['days_since'] = (today.date() - incident_date.date()).days
+    
     return render_template('index.html', data=data)
 
 @app.route('/update', methods=['POST'])
@@ -180,14 +194,16 @@ def update():
     # Move current count to prior count
     data['prior_count'] = data['days_since']
     
-    # Reset days to 0
-    data['days_since'] = 0
-    
-    # Update incident details
+    # Get new incident details
     data['incident_number'] = request.form.get('incident_number', '')
+    data['incident_date'] = request.form.get('incident_date', '')
     data['reason'] = request.form.get('reason', 'Change')
     data['last_reset'] = datetime.now().isoformat()
-    data['last_increment'] = datetime.now().date().isoformat()
+    
+    # Calculate days_since based on incident date
+    incident_date = datetime.fromisoformat(data['incident_date'])
+    today = datetime.now()
+    data['days_since'] = (today.date() - incident_date.date()).days
     
     save_data(data)
     generate_sign()
@@ -199,14 +215,6 @@ def display():
     """Serve the current sign image for the e-paper display"""
     return send_file(OUTPUT_IMAGE, mimetype='image/png')
 
-@app.route('/manual_increment', methods=['POST'])
-def manual_increment():
-    """Manual increment for testing"""
-    data = load_data()
-    data['days_since'] += 1
-    save_data(data)
-    generate_sign()
-    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     # Generate initial sign
