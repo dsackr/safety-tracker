@@ -50,7 +50,8 @@ def load_data():
         'days_since': 1,
         'prior_count': 2,
         'incident_number': '540',
-        'incident_date': '2025-10-03',  # Add this
+        'incident_date': '2025-10-03',
+        'prior_incident_date': '2025-10-01',  # Add this
         'reason': 'Deploy',
         'last_reset': datetime.now().isoformat()
     }
@@ -99,18 +100,30 @@ def generate_sign(auto_display=False):
     """Generate the safety sign with current data"""
     data = load_data()
     
-    # Calculate days since incident date
-    incident_date = datetime.fromisoformat(data['incident_date'])
-    today = datetime.now()
-    days_since = (today.date() - incident_date.date()).days
+    # Calculate days since current incident date
+    if 'incident_date' in data:
+        incident_date = datetime.fromisoformat(data['incident_date'])
+        today = datetime.now()
+        days_since = (today.date() - incident_date.date()).days
+    else:
+        days_since = data.get('days_since', 0)
     
-    # Update the display value
+    # Calculate prior count (days between prior incident and current incident)
+    if 'prior_incident_date' in data and 'incident_date' in data:
+        prior_date = datetime.fromisoformat(data['prior_incident_date'])
+        current_date = datetime.fromisoformat(data['incident_date'])
+        prior_count = (current_date.date() - prior_date.date()).days
+    else:
+        prior_count = data.get('prior_count', 0)
+    
+    # Update the display values
     data['days_since'] = days_since
+    data['prior_count'] = prior_count
     
     # Open background image
     img = Image.open(BACKGROUND_IMAGE)
     draw = ImageDraw.Draw(img)
-    
+        
     # Get actual image dimensions
     img_width, img_height = img.size
     
@@ -181,9 +194,16 @@ def index():
     data = load_data()
     
     # Calculate current days since incident
-    incident_date = datetime.fromisoformat(data['incident_date'])
-    today = datetime.now()
-    data['days_since'] = (today.date() - incident_date.date()).days
+    if 'incident_date' in data:
+        incident_date = datetime.fromisoformat(data['incident_date'])
+        today = datetime.now()
+        data['days_since'] = (today.date() - incident_date.date()).days
+    
+    # Calculate prior count
+    if 'prior_incident_date' in data and 'incident_date' in data:
+        prior_date = datetime.fromisoformat(data['prior_incident_date'])
+        current_date = datetime.fromisoformat(data['incident_date'])
+        data['prior_count'] = (current_date.date() - prior_date.date()).days
     
     return render_template('index.html', data=data)
 
@@ -191,8 +211,9 @@ def index():
 def update():
     data = load_data()
     
-    # Move current count to prior count
-    data['prior_count'] = data['days_since']
+    # Store current incident date as prior incident date
+    if 'incident_date' in data:
+        data['prior_incident_date'] = data['incident_date']
     
     # Get new incident details
     data['incident_number'] = request.form.get('incident_number', '')
@@ -200,10 +221,16 @@ def update():
     data['reason'] = request.form.get('reason', 'Change')
     data['last_reset'] = datetime.now().isoformat()
     
-    # Calculate days_since based on incident date
+    # Calculate days_since based on new incident date
     incident_date = datetime.fromisoformat(data['incident_date'])
     today = datetime.now()
     data['days_since'] = (today.date() - incident_date.date()).days
+    
+    # Calculate prior count (days between incidents)
+    if 'prior_incident_date' in data:
+        prior_date = datetime.fromisoformat(data['prior_incident_date'])
+        current_date = datetime.fromisoformat(data['incident_date'])
+        data['prior_count'] = (current_date.date() - prior_date.date()).days
     
     save_data(data)
     generate_sign()
