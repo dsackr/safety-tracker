@@ -94,6 +94,9 @@
         <div class="sign-preview">
             <h2>Current Sign</h2>
             <img src="/display?t={{ data.last_reset }}" alt="Safety Sign">
+            <form action="/send_to_display" method="post" style="margin-top: 15px;">
+                <button type="submit" style="background: #1976d2;">📺 Update E-Paper Display Now</button>
+            </form>
         </div>
         
         <h2>Report New Violation</h2>
