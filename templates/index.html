@@ -86,8 +86,11 @@
         <div class="current-status">
             <h2>Current Status</h2>
             <div class="stat">📅 Days Since Last Violation: <strong>{{ data.days_since }}</strong></div>
-            <div class="stat">🏅 Prior Count: <strong>{{ data.prior_count }}</strong></div>
-            <div class="stat">📆 Last Incident Date: <strong>{{ data.incident_date }}</strong></div>
+            <div class="stat">🏅 Prior Count (days between incidents): <strong>{{ data.prior_count }}</strong></div>
+            <div class="stat">📆 Current Incident Date: <strong>{{ data.incident_date }}</strong></div>
+            {% if data.prior_incident_date %}
+            <div class="stat">📆 Prior Incident Date: <strong>{{ data.prior_incident_date }}</strong></div>
+            {% endif %}
             <div class="stat">🔗 Last Incident: <strong>{{ data.incident_number }}</strong></div>
             <div class="stat">📋 Reason: <strong>{{ data.reason }}</strong></div>
         </div>
