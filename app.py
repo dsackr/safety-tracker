@@ -60,7 +60,28 @@ def save_data(data):
     with open(DATA_FILE, 'w') as f:
         json.dump(data, f, indent=2)
 
-def generate_sign():
+def display_on_epaper(img_path):
+    """Send image to e-paper display"""
+    try:
+        libdir = os.path.join(os.path.expanduser('~'), 'e-Paper/RaspberryPi_JetsonNano/python/lib')
+        if os.path.exists(libdir):
+            sys.path.append(libdir)
+        
+        from waveshare_epd import epd7in3e
+        
+        img = Image.open(img_path)
+        epd = epd7in3e.EPD()
+        epd.init()
+        epd.Clear()
+        epd.display(epd.getbuffer(img))
+        epd.sleep()
+        
+        return True
+    except Exception as e:
+        print(f"Error displaying on e-paper: {e}")
+        return False
+
+def generate_sign(auto_display=False):
     """Generate the safety sign with current data"""
     data = load_data()
     
@@ -109,9 +130,9 @@ def generate_sign():
     
     # Draw checkmark for reason (right red box)
     reason_positions = {
-        'Change': (CHECKMARK_X, CHECKMARK_CHANGE_Y),
-        'Deploy': (CHECKMARK_X, CHECKMARK_DEPLOY_Y),
-        'Missed': (CHECKMARK_X, CHECKMARK_MISSED_Y)
+        'Change': (CHECKMARK_CHANGE_X, CHECKMARK_CHANGE_Y),
+        'Deploy': (CHECKMARK_DEPLOY_X, CHECKMARK_DEPLOY_Y),
+        'Missed': (CHECKMARK_MISSED_X, CHECKMARK_MISSED_Y)
     }
     
     if data['reason'] in reason_positions:
@@ -120,9 +141,13 @@ def generate_sign():
     
     # Save the generated image
     img.save(OUTPUT_IMAGE)
+    
+    # Auto display to e-paper if requested
+    if auto_display:
+        display_on_epaper(OUTPUT_IMAGE)
 
 def check_and_increment():
-    """Background task to increment days at 6 AM"""
+    """Background task to increment days at 6 AM and update display"""
     while True:
         now = datetime.now()
         data = load_data()
@@ -133,12 +158,22 @@ def check_and_increment():
             data['days_since'] += 1
             data['last_increment'] = now.date().isoformat()
             save_data(data)
-            generate_sign()
-            print(f"Incremented days to {data['days_since']}")
+            
+            # Generate sign and auto-display to e-paper
+            generate_sign(auto_display=True)
+            print(f"Auto-updated at 6 AM: Days incremented to {data['days_since']} and displayed on e-paper")
         
         # Sleep for 30 minutes before checking again
         time.sleep(1800)
-
+        
+@app.route('/send_to_display', methods=['POST'])
+def send_to_display():
+    """Manually send the current sign to the e-paper display"""
+    if display_on_epaper(OUTPUT_IMAGE):
+        return 'Sign sent to display successfully! <a href="/">Go back</a>'
+    else:
+        return 'Error sending to display. Check logs. <a href="/">Go back</a>'
+        
 @app.route('/')
 def index():
     data = load_data()
