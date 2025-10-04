@@ -159,26 +159,6 @@ def generate_sign(auto_display=False):
     # Auto display to e-paper if requested
     if auto_display:
         display_on_epaper(OUTPUT_IMAGE)
-
-def check_and_increment():
-    """Background task to increment days at 6 AM and update display"""
-    while True:
-        now = datetime.now()
-        data = load_data()
-        last_increment = datetime.fromisoformat(data['last_increment'] + 'T00:00:00')
-        
-        # Check if it's 6 AM and we haven't incremented today
-        if now.hour == 6 and now.date() > last_increment.date():
-            data['days_since'] += 1
-            data['last_increment'] = now.date().isoformat()
-            save_data(data)
-            
-            # Generate sign and auto-display to e-paper
-            generate_sign(auto_display=True)
-            print(f"Auto-updated at 6 AM: Days incremented to {data['days_since']} and displayed on e-paper")
-        
-        # Sleep for 30 minutes before checking again
-        time.sleep(1800)
         
 @app.route('/send_to_display', methods=['POST'])
 def send_to_display():
@@ -231,9 +211,4 @@ def manual_increment():
 if __name__ == '__main__':
     # Generate initial sign
     generate_sign()
-    
-    # Start background increment thread
-    increment_thread = threading.Thread(target=check_and_increment, daemon=True)
-    increment_thread.start()
-    
     app.run(host='0.0.0.0', port=5001, debug=False)
