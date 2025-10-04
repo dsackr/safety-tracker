@@ -61,9 +61,10 @@ def save_data(data):
         json.dump(data, f, indent=2)
 
 def display_on_epaper(img_path):
-    """Send image to e-paper display"""
+    """Send image to e-paper display via eframe app"""
     try:
-        import sys
+        import shutil
+        import requests
         
         print(f"Attempting to display: {img_path}")
         
@@ -72,47 +73,28 @@ def display_on_epaper(img_path):
             print(f"ERROR: Image file not found at {img_path}")
             return False
         
-        print("Image file exists, loading Waveshare library...")
+        # Copy to eframe uploads folder
+        eframe_upload_path = '/home/dsackr/eframe/uploads/safety_sign.png'
+        print(f"Copying to eframe: {eframe_upload_path}")
+        shutil.copy(img_path, eframe_upload_path)
         
-        libdir = os.path.join(os.path.expanduser('~'), 'e-Paper/RaspberryPi_JetsonNano/python/lib')
-        print(f"Library directory: {libdir}")
+        # Trigger display via eframe app
+        print("Calling eframe display endpoint...")
+        response = requests.get('http://localhost:5000/display/safety_sign.png?raw=true')
         
-        if os.path.exists(libdir):
-            sys.path.append(libdir)
-            print("Library path added")
+        if response.status_code == 200:
+            print("Successfully displayed via eframe!")
+            return True
         else:
-            print(f"ERROR: Library directory not found at {libdir}")
+            print(f"Error from eframe: {response.status_code}")
             return False
-        
-        from waveshare_epd import epd7in3e
-        print("Waveshare library imported successfully")
-        
-        img = Image.open(img_path)
-        print(f"Image opened: {img.size}")
-        
-        epd = epd7in3e.EPD()
-        print("EPD object created")
-        
-        epd.init()
-        print("EPD initialized")
-        
-        epd.Clear()
-        print("EPD cleared")
-        
-        epd.display(epd.getbuffer(img))
-        print("Image displayed")
-        
-        epd.sleep()
-        print("EPD put to sleep - SUCCESS!")
-        
-        return True
-        
+            
     except Exception as e:
         print(f"EXCEPTION in display_on_epaper: {type(e).__name__}: {str(e)}")
         import traceback
         traceback.print_exc()
         return False
-
+        
 def generate_sign(auto_display=False):
     """Generate the safety sign with current data"""
     data = load_data()
