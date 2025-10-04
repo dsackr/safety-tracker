@@ -130,9 +130,9 @@ def generate_sign(auto_display=False):
     
     # Draw checkmark for reason (right red box)
     reason_positions = {
-        'Change': (CHECKMARK_CHANGE_X, CHECKMARK_CHANGE_Y),
-        'Deploy': (CHECKMARK_DEPLOY_X, CHECKMARK_DEPLOY_Y),
-        'Missed': (CHECKMARK_MISSED_X, CHECKMARK_MISSED_Y)
+        'Change': (CHECKMARK_X, CHECKMARK_CHANGE_Y),
+        'Deploy': (CHECKMARK_X, CHECKMARK_DEPLOY_Y),
+        'Missed': (CHECKMARK_X, CHECKMARK_MISSED_Y)
     }
     
     if data['reason'] in reason_positions:
