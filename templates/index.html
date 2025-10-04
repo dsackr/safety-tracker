@@ -87,6 +87,7 @@
             <h2>Current Status</h2>
             <div class="stat">📅 Days Since Last Violation: <strong>{{ data.days_since }}</strong></div>
             <div class="stat">🏅 Prior Count: <strong>{{ data.prior_count }}</strong></div>
+            <div class="stat">📆 Last Incident Date: <strong>{{ data.incident_date }}</strong></div>
             <div class="stat">🔗 Last Incident: <strong>{{ data.incident_number }}</strong></div>
             <div class="stat">📋 Reason: <strong>{{ data.reason }}</strong></div>
         </div>
@@ -102,11 +103,16 @@
         <h2>Report New Violation</h2>
         <form action="/update" method="post">
             <div class="form-group">
-                <label for="incident_number">Incident Number (numbers only):</label>
-                <input type="text" id="incident_number" name="incident_number" placeholder="xxx" required>
+                <label for="incident_date">Incident Date:</label>
+                <input type="date" id="incident_date" name="incident_date" required>
             </div>
             
-        <div class="form-group">
+            <div class="form-group">
+                <label for="incident_number">Incident Number (numbers only):</label>
+                <input type="text" id="incident_number" name="incident_number" placeholder="540" required>
+            </div>
+            
+            <div class="form-group">
                 <label>Violation Reason:</label>
                 <div style="margin-top: 10px;">
                     <label style="display: block; margin: 10px 0; cursor: pointer;">
@@ -124,12 +130,8 @@
                 </div>
             </div>
             
-            <button type="submit">Report Violation (Resets Counter)</button>
-        </form>
-        
-        <form action="/manual_increment" method="post" style="margin-top: 20px;">
-            <button type="submit" class="test-btn">Manual +1 Day (Test)</button>
-        </form>
+            <button type="submit">Report Violation</button>
+        </form>        
     </div>
 </body>
 </html>
