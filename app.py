@@ -63,22 +63,54 @@ def save_data(data):
 def display_on_epaper(img_path):
     """Send image to e-paper display"""
     try:
+        import sys
+        
+        print(f"Attempting to display: {img_path}")
+        
+        # Check if image exists
+        if not os.path.exists(img_path):
+            print(f"ERROR: Image file not found at {img_path}")
+            return False
+        
+        print("Image file exists, loading Waveshare library...")
+        
         libdir = os.path.join(os.path.expanduser('~'), 'e-Paper/RaspberryPi_JetsonNano/python/lib')
+        print(f"Library directory: {libdir}")
+        
         if os.path.exists(libdir):
             sys.path.append(libdir)
+            print("Library path added")
+        else:
+            print(f"ERROR: Library directory not found at {libdir}")
+            return False
         
         from waveshare_epd import epd7in3e
+        print("Waveshare library imported successfully")
         
         img = Image.open(img_path)
+        print(f"Image opened: {img.size}")
+        
         epd = epd7in3e.EPD()
+        print("EPD object created")
+        
         epd.init()
+        print("EPD initialized")
+        
         epd.Clear()
+        print("EPD cleared")
+        
         epd.display(epd.getbuffer(img))
+        print("Image displayed")
+        
         epd.sleep()
+        print("EPD put to sleep - SUCCESS!")
         
         return True
+        
     except Exception as e:
-        print(f"Error displaying on e-paper: {e}")
+        print(f"EXCEPTION in display_on_epaper: {type(e).__name__}: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return False
 
 def generate_sign(auto_display=False):
