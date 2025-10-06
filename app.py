@@ -44,10 +44,10 @@ ESP32_IP = "192.168.86.127"
 PALETTE = {
     'black': (0, 0, 0, 0x0),
     'white': (255, 255, 255, 0x1),
-    'yellow': (255, 240, 0, 0x2),
-    'red': (180, 60, 30, 0x3),
-    'blue': (80, 100, 160, 0x5),
-    'green': (120, 180, 60, 0x6)
+    'yellow': (255, 255, 0, 0x2),
+    'red': (200, 80, 50, 0x3),
+    'blue': (100, 120, 180, 0x5),
+    'green': (200, 200, 80, 0x6)
 }
 
 def rgb_to_palette_code(r, g, b):
@@ -65,11 +65,9 @@ def rgb_to_palette_code(r, g, b):
 
 def convert_image_to_binary(img):
     """Convert PIL Image to binary format for ESP32"""
-    # Ensure RGB mode
     if img.mode != 'RGB':
         img = img.convert('RGB')
     
-    # Resize/crop to 800x480
     img_ratio = img.width / img.height
     display_ratio = 800 / 480
     
@@ -85,7 +83,16 @@ def convert_image_to_binary(img):
     top = (new_height - 480) // 2
     img = img.crop((left, top, left + 800, top + 480))
     
-    # Convert to binary (2 pixels per byte, 4 bits each)
+    # Use dithering with the 6-color palette
+    palette_data = [
+        0, 0, 0, 255, 255, 255, 255, 255, 0,
+        200, 80, 50, 100, 120, 180, 200, 200, 80
+    ]
+    palette_img = Image.new('P', (1, 1))
+    palette_img.putpalette(palette_data + [0] * (256 * 3 - len(palette_data)))
+    img = img.quantize(palette=palette_img, dither=Image.Dither.FLOYDSTEINBERG)
+    img = img.convert('RGB')
+    
     binary_data = bytearray(192000)
     
     for row in range(480):
