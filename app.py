@@ -38,7 +38,7 @@ BACKGROUND_IMAGE = 'static/background.png'
 OUTPUT_IMAGE = 'static/current_sign.png'
 
 # E-Paper Display Configuration (Pi Zero)
-EINK_DISPLAY_IP = "192.168.86.XXX"  # Replace with your Pi Zero IP address
+EINK_DISPLAY_IP = "192.168.86.120"  # Replace with your Pi Zero IP address
 EINK_DISPLAY_PORT = 5000
 
 # 6-color palette for E-Paper display
