@@ -37,10 +37,11 @@ DATA_FILE = 'data.json'
 BACKGROUND_IMAGE = 'static/background.png'
 OUTPUT_IMAGE = 'static/current_sign.png'
 
-# ESP32 Configuration
-ESP32_IP = "192.168.86.120"
+# E-Paper Display Configuration (Pi Zero)
+EINK_DISPLAY_IP = "192.168.86.XXX"  # Replace with your Pi Zero IP address
+EINK_DISPLAY_PORT = 5000
 
-# 6-color palette for ESP32 display
+# 6-color palette for E-Paper display
 PALETTE = {
     'black': (0, 0, 0, 0x0),
     'white': (255, 255, 255, 0x1),
@@ -64,7 +65,7 @@ def rgb_to_palette_code(r, g, b):
     return closest_code
 
 def convert_image_to_binary(img):
-    """Convert PIL Image to binary format for ESP32"""
+    """Convert PIL Image to binary format for E-Paper display"""
     if img.mode != 'RGB':
         img = img.convert('RGB')
     
@@ -109,7 +110,7 @@ def convert_image_to_binary(img):
     return bytes(binary_data)
 
 def display_on_epaper(img_path):
-    """Send image to ESP32 e-paper display"""
+    """Send image to Pi Zero e-paper display"""
     try:
         print(f"Converting and sending image: {img_path}")
         
@@ -121,20 +122,20 @@ def display_on_epaper(img_path):
         img = Image.open(img_path)
         binary_data = convert_image_to_binary(img)
         
-        # Send to ESP32
-        print(f"Sending to ESP32 at {ESP32_IP}...")
+        # Send to Pi Zero E-Paper Display
+        print(f"Sending to E-Paper Display at {EINK_DISPLAY_IP}:{EINK_DISPLAY_PORT}...")
         response = requests.post(
-            f'http://{ESP32_IP}/display',
+            f'http://{EINK_DISPLAY_IP}:{EINK_DISPLAY_PORT}/display/binary',
             files={'file': ('sign.bin', binary_data)},
             headers={'Connection': 'keep-alive'},
             timeout=120
         )
         
         if response.status_code == 200:
-            print("Successfully sent to ESP32!")
+            print("Successfully sent to E-Paper Display!")
             return True
         else:
-            print(f"Error from ESP32: {response.status_code}")
+            print(f"Error from E-Paper Display: {response.status_code}")
             return False
             
     except Exception as e:
@@ -250,7 +251,7 @@ def generate_sign(auto_display=False):
 def send_to_display():
     """Manually send the current sign to the e-paper display"""
     if display_on_epaper(OUTPUT_IMAGE):
-        return 'Sign sent to ESP32 display successfully! <a href="/">Go back</a>'
+        return 'Sign sent to E-Paper display successfully! <a href="/">Go back</a>'
     else:
         return 'Error sending to display. Check logs. <a href="/">Go back</a>'
 
