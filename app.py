@@ -38,7 +38,7 @@ BACKGROUND_IMAGE = 'static/background.png'
 OUTPUT_IMAGE = 'static/current_sign.png'
 
 # ESP32 Configuration
-ESP32_IP = "192.168.86.127"
+ESP32_IP = "192.168.86.120"
 
 # 6-color palette for ESP32 display
 PALETTE = {
